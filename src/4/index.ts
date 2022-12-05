@@ -1,8 +1,6 @@
 import fs from 'fs/promises'
 import path from 'path'
 
-import { range, intersection, isMatch } from 'lodash'
-
 export const parse = (raw: string) => {
   return raw
     .toString()
