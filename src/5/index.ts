@@ -11,35 +11,31 @@ export const parse = (raw: string): [string[][], Instruction[]] => {
 }
 
 export const flip = (lines: string[][]) => {
-  const columnsCount = lines[0].length
-  const columns: string[][] = []
-
-  for (let i = 0; i < lines.length; i++) {
-    let line = lines[i]
-    for (let j = 0; j < line.length; j++) {
-      if (!Array.isArray(columns[j])) {
-        columns[j] = []
+  const columns: string[][] = Array.from(lines[0], (x) => [])
+  lines.forEach((line) => {
+    line.forEach((c, ci) => {
+      if (c !== '') {
+        columns[ci].push(c)
       }
-      if (line[j] !== '') {
-        columns[j].push(line[j])
-      }
-    }
-  }
-
+    })
+  })
   return columns
 }
 
 export const parseCrates = (line: string) => {
-  const columns = Math.ceil(line.length / 4)
+  const MAX_C_LENGTH = 4
+  const columns = Math.ceil(line.length / MAX_C_LENGTH)
   const crates: string[] = []
   for (let i = 0; i < columns; i++) {
-    crates.push(line.substring(i * 4, i * 4 + 4))
+    crates.push(
+      line.substring(i * MAX_C_LENGTH, i * MAX_C_LENGTH + MAX_C_LENGTH).trim()
+    )
   }
-  return crates.map((c) => c.trim())
+  return crates
 }
 
 export const parseInstruction = (line: string) => {
-  const ns = (line.match(/\d+/g) ?? []).map((n) => Number(n))
+  const ns = (line.match(/\d+/g) ?? []).map(Number)
   return {
     n: ns[0],
     from: ns[1] - 1,
@@ -77,12 +73,12 @@ const toString = (crates: string[][]) =>
   crates.reduce((a, c) => a + c[0], '').replace(/\W/g, '')
 
 export const partOne = (crates: string[][], instructions: Instruction[]) => {
-  instructions.map((i) => applyInstruction(crates, i))
+  instructions.forEach((i) => applyInstruction(crates, i))
   return toString(crates)
 }
 
 export const partTwo = (crates: string[][], instructions: Instruction[]) => {
-  instructions.map((i) => applyInstruction2(crates, i))
+  instructions.forEach((i) => applyInstruction2(crates, i))
   return toString(crates)
 }
 
