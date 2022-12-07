@@ -62,7 +62,7 @@ class Drawer {
   }
 
   initEmptyGrid() {
-    this.grid = Array.from(new Array(this.width), (x) =>
+    this.grid = Array.from(new Array(this.height), (x) =>
       new Array(this.width).fill('.')
     )
   }
