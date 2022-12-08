@@ -1,5 +1,4 @@
 import fs from 'fs/promises'
-import { forEach, split } from 'lodash'
 import path from 'path'
 
 const sample = `30373
@@ -37,10 +36,7 @@ const main = async () => {
       const ls = line.slice(0, ci).reverse()
 
       // right slice
-      const rs = [...line]
-        .reverse()
-        .slice(0, line.length - 1 - ci)
-        .reverse()
+      const rs = [...line].slice(ci + 1)
 
       // up slice
       const us = data
@@ -49,11 +45,7 @@ const main = async () => {
         .reverse()
 
       // down slice
-      const ds = [...data]
-        .reverse()
-        .slice(0, data.length - 1 - li)
-        .map((l) => l[ci])
-        .reverse()
+      const ds = [...data].slice(li + 1).map((l) => l[ci])
 
       const compare = createComparator(col)
       const viewCalc = createViewCalc(col)
