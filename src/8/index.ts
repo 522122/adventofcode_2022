@@ -11,8 +11,6 @@ export const parse = (raw: string) => {
   return raw.split('\n').map((l) => l.split('').map(Number))
 }
 
-const createComparator = (i: number) => (j: number) => j < i
-
 const createViewCalc = (current: number) => (trees: number[]) => {
   let dist = 0
   for (let tree of trees) {
@@ -20,6 +18,17 @@ const createViewCalc = (current: number) => (trees: number[]) => {
     if (tree >= current) break
   }
   return dist
+}
+
+const createIsVisible = (current: number) => (trees: number[]) => {
+  let visible = true
+  for (let tree of trees) {
+    if (tree >= current) {
+      visible = false
+      break
+    }
+  }
+  return visible
 }
 
 const main = async () => {
@@ -36,7 +45,7 @@ const main = async () => {
       const ls = line.slice(0, ci).reverse()
 
       // right slice
-      const rs = [...line].slice(ci + 1)
+      const rs = line.slice(ci + 1)
 
       // up slice
       const us = data
@@ -45,18 +54,13 @@ const main = async () => {
         .reverse()
 
       // down slice
-      const ds = [...data].slice(li + 1).map((l) => l[ci])
+      const ds = data.slice(li + 1).map((l) => l[ci])
 
-      const compare = createComparator(col)
       const viewCalc = createViewCalc(col)
+      const isVisible = createIsVisible(col)
 
       // pt1
-      if (
-        ls.every(compare) ||
-        rs.every(compare) ||
-        us.every(compare) ||
-        ds.every(compare)
-      ) {
+      if (isVisible(ls) || isVisible(rs) || isVisible(us) || isVisible(ds)) {
         visible.set([li, ci], col)
       }
 
