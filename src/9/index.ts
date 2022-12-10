@@ -61,7 +61,6 @@ class Tail {
   head: Tail | undefined
   tail: Tail | undefined
   position: Position
-  queueNextTailMove: Position | undefined
   name: string
   constructor(name: string = 'no-name') {
     this.position = new Position(0, 0)
