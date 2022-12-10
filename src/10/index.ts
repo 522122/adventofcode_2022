@@ -9,7 +9,7 @@ export const parse = (raw: string) => {
   return raw.split('\n')
 }
 
-class Instruction {
+abstract class Instruction {
   cycles: number = 0
   add: number = 0
   constructor(input: string) {}
@@ -28,11 +28,68 @@ class Noop extends Instruction {
   cycles: number = 1
 }
 
-class Register {
+abstract class FunctionalUnit {
+  cycle(n: number, x: number) {}
+}
+class Part1 extends FunctionalUnit {
+  signals: number[] = []
+  cycles: number[]
+  constructor(cycles: number[]) {
+    super()
+    this.cycles = cycles
+  }
+
+  cycle(n: number, x: number) {
+    if (this.cycles.includes(n)) {
+      this.signals.push(n * x)
+    }
+  }
+
+  sum() {
+    console.log(this.signals.reduce((a, c) => a + c, 0))
+  }
+}
+class Crt extends FunctionalUnit {
+  lines: string[][] = []
+  WIDTH: number
+  HEIGHT: number
+  constructor(width: number, height: number) {
+    super()
+    this.WIDTH = width
+    this.HEIGHT = height
+    for (let i = 0; i < this.HEIGHT; i++) {
+      this.lines.push([])
+    }
+  }
+
+  cycle(n: number, x: number) {
+    const sprite = [x - 1, x, x + 1]
+    const line = Math.ceil(n / this.WIDTH) - 1
+    const pixel = (n - 1) % this.WIDTH
+    const ch = sprite.includes(pixel) ? '#' : '.'
+    if (line < this.HEIGHT && pixel < this.WIDTH) {
+      this.lines[line].push(ch)
+    }
+    return this
+  }
+
+  draw() {
+    for (let line of this.lines) {
+      console.log(line.join(' '))
+    }
+  }
+}
+
+class Cpu {
   x: number = 1
   cycle: number = 0
-  instructions: Instruction[] = []
-  constructor(input: string[]) {
+  _instructions: Instruction[] = []
+  fus: FunctionalUnit[] = []
+  constructor(l: any[]) {
+    this.fus = [...l]
+  }
+
+  instructions(input: string[]) {
     for (let rawInstruction of input) {
       let i: Instruction
       if (rawInstruction === 'noop') {
@@ -40,40 +97,21 @@ class Register {
       } else {
         i = new AddX(rawInstruction)
       }
-      this.instructions.push(i)
+      this._instructions.push(i)
     }
+    return this
   }
 
-  execute(outputs: number[]): [number[], string[][]] {
-    const values = []
-    let lineRef: string[] = []
-    const crt: string[][] = [lineRef]
-    while (this.instructions.length) {
-      const i = this.instructions.shift() as Instruction
-
+  execute() {
+    while (this._instructions.length) {
+      const i = this._instructions.shift() as Instruction
       while (i?.cycles) {
         ++this.cycle
         --i.cycles
-        // part 1
-        if (outputs.includes(this.cycle)) {
-          values.push(this.x * this.cycle)
-        }
-
-        // part 2
-        const pixel = (this.cycle - 1) % 40
-        const sprite = [this.x - 1, this.x, this.x + 1]
-        lineRef.push(sprite.includes(pixel) ? '#' : '.')
-
-        if (this.cycle % 40 === 0) {
-          lineRef = []
-          crt.push(lineRef)
-        }
+        this.fus.forEach((fu) => fu.cycle(this.cycle, this.x))
       }
-
       this.x += i.add
     }
-
-    return [values, crt]
   }
 }
 
@@ -84,16 +122,14 @@ const main = async () => {
   const data = parse(buffer.toString())
   // const data = parse(sample)
 
-  const REGISTER = new Register(data)
+  const part1 = new Part1([20, 60, 100, 140, 180, 220])
+  const crt = new Crt(40, 6)
+  const cpu = new Cpu([part1, crt])
 
-  const [values, crt] = REGISTER.execute([20, 60, 100, 140, 180, 220])
+  cpu.instructions(data).execute()
 
-  console.log(values.reduce((a, c) => a + c, 0))
-
-  console.log(crt.length, crt[0].length)
-  for (let l of crt) {
-    console.log(l.join(' '))
-  }
+  part1.sum()
+  crt.draw()
 }
 
 export default main
