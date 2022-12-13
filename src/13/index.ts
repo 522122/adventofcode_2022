@@ -64,7 +64,7 @@ const main = async () => {
   let sum = 0
   for (let i = 0; i < data.length; i++) {
     const result = compare(data[i][0], data[i][1])
-    sum += result === 1 ? i + 1 : 0
+    sum += result === -1 ? i + 1 : 0
   }
 
   console.log(sum)
