@@ -15,3 +15,9 @@ export const traverse = <T>(arr: T[][], callback: TraverseCallback<T>) => {
     }
   }
 }
+
+export const debugLog = (...val: any) => {
+  if (process.env.DEBUG) {
+    console.log(...val)
+  }
+}
