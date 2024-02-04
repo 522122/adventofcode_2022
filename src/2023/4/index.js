@@ -42,9 +42,15 @@ const stringify = (set) => {
   return [...set.values()].join(', ')
 }
 
+const cache = new Map()
 
 const repeat = (key, n, cards, start, tmpStart) => {
   let x = 0
+
+  if (cache.has(`${start}:${tmpStart}`)) {
+    return cache.get(`${start}:${tmpStart}`)
+  }
+
   for (let i=1; i<n + 1; i++) {
     console.log('winning',  key + i, 'start', start, tmpStart)
     const tmpCard = cards.get(key + i)
@@ -53,6 +59,7 @@ const repeat = (key, n, cards, start, tmpStart) => {
      x += repeat(key + i, tmpWinning, cards, start, key + i)
    }
 
+   cache.set(`${start}:${tmpStart}`, x)
    return x
 }
 
@@ -72,7 +79,6 @@ function main() {
   }
   console.log(totalWorth)
 
-  // slow as ... but it works
   let sum = 0
   for (let card of cards) {
     sum += part2(card, cards, card[0], card[0])
